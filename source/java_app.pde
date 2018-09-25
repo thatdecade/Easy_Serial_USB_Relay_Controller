@@ -38,6 +38,9 @@ int LABEL_Y_CHAR_SPACING = 12;
 
 int relay_counter = 0;
 
+boolean com_is_ok = false;
+boolean error_displayed = false;
+
 void setup() 
 {
   int longest_string = 0;
@@ -76,6 +79,7 @@ void setup()
   create_relay_switch(RELAY_6_TABLE_INDEX, "Relay6", "label6");
   create_relay_switch(RELAY_7_TABLE_INDEX, "Relay7", "label7");
   create_relay_switch(RELAY_8_TABLE_INDEX, "Relay8", "label8");
+
 }
 
 void set_relay(int relay_index, int relay_state)
@@ -83,18 +87,29 @@ void set_relay(int relay_index, int relay_state)
   TableRow row = relay_config.getRow(relay_index);
   String comport = row.getString("comport");
   int channel = row.getInt("channel");
+  String[] ports = Serial.list();
+
+  com_is_ok = false;
   
-  open_serial_port(comport);
-  myPort.write(SERIAL_START_BYTE);
-  myPort.write(channel);
-  myPort.write(relay_state);
-  myPort.write(SERIAL_START_BYTE + channel + relay_state); //checksum
-  close_serial_port();
+  for (String p : ports)
+  {
+    if (p.equals(comport))
+    {
+      com_is_ok = true;
+      open_serial_port(comport);
+      myPort.write(SERIAL_START_BYTE);
+      myPort.write(channel);
+      myPort.write(relay_state);
+      myPort.write(SERIAL_START_BYTE + channel + relay_state); //checksum
+      close_serial_port();
+    }
+  }
 }
 
 void open_serial_port(String port_number)
 {
-  myPort = new Serial(this, port_number, SERIAL_BAUD);
+   myPort = new Serial(this, port_number, SERIAL_BAUD);
+   println("OPEN");
 }
   
 void close_serial_port()
@@ -133,6 +148,8 @@ void create_relay_switch(int table_index, String switch_name, String label_name)
        .setValue(true)
        .setMode(ControlP5.SWITCH)
        .setState(initial_state)
+       .setColorCaptionLabel(255)
+       .setCaptionLabel(row.getString("comport") + " - CH" + row.getString("channel"))
        ;
     
     cp5.addTextlabel(label_name)
@@ -148,6 +165,26 @@ void create_relay_switch(int table_index, String switch_name, String label_name)
   
 void draw() {
   
+  if(error_displayed == false && com_is_ok == false)
+  {
+    error_displayed = true;
+    
+    cp5.addTextlabel("error_label")
+              .setText("Check Config: COM Port Error")
+              .setPosition(10,10)
+              .setColorValue(128)
+              .setColor(0xffff0000)
+              .setFont(createFont("Georgia",12))
+              ;
+  
+  }
+  
+  if(error_displayed == true && com_is_ok == true)
+  {
+    error_displayed = false;
+    cp5.remove("error_label");
+  }
+  
   //check for switch changes, command relays
   for (int i=0; i<relay_config.getRowCount(); i++) 
   {
@@ -155,6 +192,7 @@ void draw() {
      {
        last_toggleValues[i] = toggleValues[i]; 
        set_relay(i, toggleValues[i]);
+   
      }
   }
   

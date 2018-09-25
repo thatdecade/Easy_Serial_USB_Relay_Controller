@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream; 
 import java.io.IOException; 
 
-public class java_app2 extends PApplet {
+public class java_app extends PApplet {
 
 
 
@@ -57,6 +57,9 @@ int LABEL_Y_CHAR_SPACING = 12;
 
 int relay_counter = 0;
 
+boolean com_is_ok = false;
+boolean error_displayed = false;
+
 public void setup() 
 {
   int longest_string = 0;
@@ -95,6 +98,7 @@ public void setup()
   create_relay_switch(RELAY_6_TABLE_INDEX, "Relay6", "label6");
   create_relay_switch(RELAY_7_TABLE_INDEX, "Relay7", "label7");
   create_relay_switch(RELAY_8_TABLE_INDEX, "Relay8", "label8");
+
 }
 
 public void set_relay(int relay_index, int relay_state)
@@ -102,18 +106,29 @@ public void set_relay(int relay_index, int relay_state)
   TableRow row = relay_config.getRow(relay_index);
   String comport = row.getString("comport");
   int channel = row.getInt("channel");
+  String[] ports = Serial.list();
+
+  com_is_ok = false;
   
-  open_serial_port(comport);
-  myPort.write(SERIAL_START_BYTE);
-  myPort.write(channel);
-  myPort.write(relay_state);
-  myPort.write(SERIAL_START_BYTE + channel + relay_state); //checksum
-  close_serial_port();
+  for (String p : ports)
+  {
+    if (p.equals(comport))
+    {
+      com_is_ok = true;
+      open_serial_port(comport);
+      myPort.write(SERIAL_START_BYTE);
+      myPort.write(channel);
+      myPort.write(relay_state);
+      myPort.write(SERIAL_START_BYTE + channel + relay_state); //checksum
+      close_serial_port();
+    }
+  }
 }
 
 public void open_serial_port(String port_number)
 {
-  myPort = new Serial(this, port_number, SERIAL_BAUD);
+   myPort = new Serial(this, port_number, SERIAL_BAUD);
+   println("OPEN");
 }
   
 public void close_serial_port()
@@ -152,6 +167,8 @@ public void create_relay_switch(int table_index, String switch_name, String labe
        .setValue(true)
        .setMode(ControlP5.SWITCH)
        .setState(initial_state)
+       .setColorCaptionLabel(255)
+       .setCaptionLabel(row.getString("comport") + " - CH" + row.getString("channel"))
        ;
     
     cp5.addTextlabel(label_name)
@@ -167,6 +184,26 @@ public void create_relay_switch(int table_index, String switch_name, String labe
   
 public void draw() {
   
+  if(error_displayed == false && com_is_ok == false)
+  {
+    error_displayed = true;
+    
+    cp5.addTextlabel("error_label")
+              .setText("Check Config: COM Port Error")
+              .setPosition(10,10)
+              .setColorValue(128)
+              .setColor(0xffff0000)
+              .setFont(createFont("Georgia",12))
+              ;
+  
+  }
+  
+  if(error_displayed == true && com_is_ok == true)
+  {
+    error_displayed = false;
+    cp5.remove("error_label");
+  }
+  
   //check for switch changes, command relays
   for (int i=0; i<relay_config.getRowCount(); i++) 
   {
@@ -174,6 +211,7 @@ public void draw() {
      {
        last_toggleValues[i] = toggleValues[i]; 
        set_relay(i, toggleValues[i]);
+   
      }
   }
   
@@ -271,7 +309,7 @@ public void Relay8(boolean theFlag) {
 }
   public void settings() {  size(400,400);  smooth(); }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "java_app2" };
+    String[] appletArgs = new String[] { "java_app" };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {
