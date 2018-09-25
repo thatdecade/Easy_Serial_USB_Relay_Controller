@@ -1,5 +1,3 @@
-
-
 import controlP5.*;
 import processing.serial.*;
 
@@ -23,11 +21,13 @@ int RELAY_8_TABLE_INDEX = 7;
 
 int RELAY_CLOSED = 1;
 int RELAY_OPEN = 0;
+int DISABLE_DEFAULT = 2;
 
 boolean RELAY_CLOSED_BOOL = false;
 boolean RELAY_OPEN_BOOL = true;
 
 int[] toggleValues = {RELAY_OPEN, RELAY_OPEN, RELAY_OPEN, RELAY_OPEN, RELAY_OPEN, RELAY_OPEN, RELAY_OPEN, RELAY_OPEN, };
+int[] last_toggleValues = {DISABLE_DEFAULT, DISABLE_DEFAULT, DISABLE_DEFAULT, DISABLE_DEFAULT, DISABLE_DEFAULT, DISABLE_DEFAULT, DISABLE_DEFAULT, DISABLE_DEFAULT, };
 
 int STARTING_X_POS = 30;
 int SWITCH_X_SPACING = 50;
@@ -67,7 +67,7 @@ void setup()
   
   cp5 = new ControlP5(this);
 
-  //Note: each switch has a coorsponding function of the same name to handle state
+  //Note: each switch has a coorsponding function of the same name to handle state changes
   create_relay_switch(RELAY_1_TABLE_INDEX, "Relay1", "label1");
   create_relay_switch(RELAY_2_TABLE_INDEX, "Relay2", "label2");
   create_relay_switch(RELAY_3_TABLE_INDEX, "Relay3", "label3");
@@ -76,7 +76,6 @@ void setup()
   create_relay_switch(RELAY_6_TABLE_INDEX, "Relay6", "label6");
   create_relay_switch(RELAY_7_TABLE_INDEX, "Relay7", "label7");
   create_relay_switch(RELAY_8_TABLE_INDEX, "Relay8", "label8");
-  
 }
 
 void set_relay(int relay_index, int relay_state)
@@ -84,9 +83,6 @@ void set_relay(int relay_index, int relay_state)
   TableRow row = relay_config.getRow(relay_index);
   String comport = row.getString("comport");
   int channel = row.getInt("channel");
-  
-  println("comport = " + comport);
-  println("channel = " + channel);
   
   open_serial_port(comport);
   myPort.write(SERIAL_START_BYTE);
@@ -116,6 +112,11 @@ void create_relay_switch(int table_index, String switch_name, String label_name)
     TableRow row = relay_config.getRow(table_index);
     toggleValues[table_index] = row.getInt("default");
     
+    if(toggleValues[table_index] == DISABLE_DEFAULT)
+    {
+       last_toggleValues[table_index] = toggleValues[table_index];
+    }
+    
     if(toggleValues[table_index]==RELAY_CLOSED) 
     {
       initial_state = RELAY_CLOSED_BOOL;
@@ -141,11 +142,22 @@ void create_relay_switch(int table_index, String switch_name, String label_name)
                     .setFont(createFont("Georgia",20))
                     ;
                     
-    relay_counter++;
+    relay_counter++; //used for spacing of the buttons
   }
 }
   
 void draw() {
+  
+  //check for switch changes, command relays
+  for (int i=0; i<relay_config.getRowCount(); i++) 
+  {
+     if(last_toggleValues[i] != toggleValues[i])
+     {
+       last_toggleValues[i] = toggleValues[i]; 
+       set_relay(i, toggleValues[i]);
+     }
+  }
+  
   background(255);
   pushMatrix();
   popMatrix();
@@ -154,120 +166,87 @@ void draw() {
 void Relay1(boolean theFlag) {
   if(theFlag==false) {
     //toggle left
-    //toggleValues[RELAY_1_TABLE_INDEX] = row.getInt("default");
     toggleValues[RELAY_1_TABLE_INDEX] = RELAY_CLOSED;
-    //println(toggleValues[RELAY_1_TABLE_INDEX]);
     
   } else {
     //toggle right
     toggleValues[RELAY_1_TABLE_INDEX] = RELAY_OPEN;
-    //println(toggleValues[RELAY_1_TABLE_INDEX]);
   }
-  
-  set_relay(RELAY_1_TABLE_INDEX, toggleValues[RELAY_1_TABLE_INDEX]);
 }
 
 void Relay2(boolean theFlag) {
   if(theFlag==false) {
     //toggle left
     toggleValues[RELAY_2_TABLE_INDEX] = RELAY_CLOSED;
-    //println(toggleValues[RELAY_2_TABLE_INDEX]);
     
   } else {
     //toggle right
     toggleValues[RELAY_2_TABLE_INDEX] = RELAY_OPEN;
-    //println(toggleValues[RELAY_2_TABLE_INDEX]);
   }
-  
-  set_relay(RELAY_2_TABLE_INDEX, toggleValues[RELAY_2_TABLE_INDEX]);
 }
 
 void Relay3(boolean theFlag) {
   if(theFlag==false) {
     //toggle left
     toggleValues[RELAY_3_TABLE_INDEX] = RELAY_CLOSED;
-    //println(toggleValues[RELAY_3_TABLE_INDEX]);
     
   } else {
     //toggle right
     toggleValues[RELAY_3_TABLE_INDEX] = RELAY_OPEN;
-    //println(toggleValues[RELAY_3_TABLE_INDEX]);
   }
-  
-  set_relay(RELAY_3_TABLE_INDEX, toggleValues[RELAY_3_TABLE_INDEX]);
 }
 
 void Relay4(boolean theFlag) {
   if(theFlag==false) {
     //toggle left
     toggleValues[RELAY_4_TABLE_INDEX] = RELAY_CLOSED;
-    //println(toggleValues[RELAY_4_TABLE_INDEX]);
     
   } else {
     //toggle right
     toggleValues[RELAY_4_TABLE_INDEX] = RELAY_OPEN;
-    //println(toggleValues[RELAY_4_TABLE_INDEX]);
   }
-  
-  set_relay(RELAY_4_TABLE_INDEX, toggleValues[RELAY_4_TABLE_INDEX]);
 }
 
 void Relay5(boolean theFlag) {
   if(theFlag==false) {
     //toggle left
     toggleValues[RELAY_5_TABLE_INDEX] = RELAY_CLOSED;
-    //println(toggleValues[RELAY_5_TABLE_INDEX]);
     
   } else {
     //toggle right
     toggleValues[RELAY_5_TABLE_INDEX] = RELAY_OPEN;
-    //println(toggleValues[RELAY_5_TABLE_INDEX]);
   }
-  
-  set_relay(RELAY_5_TABLE_INDEX, toggleValues[RELAY_5_TABLE_INDEX]);
 }
 
 void Relay6(boolean theFlag) {
   if(theFlag==false) {
     //toggle left
     toggleValues[RELAY_6_TABLE_INDEX] = RELAY_CLOSED;
-    //println(toggleValues[RELAY_6_TABLE_INDEX]);
     
   } else {
     //toggle right
     toggleValues[RELAY_6_TABLE_INDEX] = RELAY_OPEN;
-    //println(toggleValues[RELAY_6_TABLE_INDEX]);
   }
-  
-  set_relay(RELAY_6_TABLE_INDEX, toggleValues[RELAY_6_TABLE_INDEX]);
 }
 
 void Relay7(boolean theFlag) {
   if(theFlag==false) {
     //toggle left
     toggleValues[RELAY_7_TABLE_INDEX] = RELAY_CLOSED;
-    //println(toggleValues[RELAY_7_TABLE_INDEX]);
     
   } else {
     //toggle right
     toggleValues[RELAY_7_TABLE_INDEX] = RELAY_OPEN;
-    //println(toggleValues[RELAY_7_TABLE_INDEX]);
   }
-  
-  set_relay(RELAY_7_TABLE_INDEX, toggleValues[RELAY_7_TABLE_INDEX]);
 }
 
 void Relay8(boolean theFlag) {
   if(theFlag==false) {
     //toggle left
     toggleValues[RELAY_8_TABLE_INDEX] = RELAY_CLOSED;
-    //println(toggleValues[RELAY_8_TABLE_INDEX]);
     
   } else {
     //toggle right
     toggleValues[RELAY_8_TABLE_INDEX] = RELAY_OPEN;
-    //println(toggleValues[RELAY_8_TABLE_INDEX]);
   }
-  
-  set_relay(RELAY_8_TABLE_INDEX, toggleValues[RELAY_8_TABLE_INDEX]);
 }
