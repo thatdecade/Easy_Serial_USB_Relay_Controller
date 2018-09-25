@@ -1,0 +1,5 @@
+label,comport,channel,default
+USB Relay Name 1,COM10,1,0
+USB Relay Name 2,COM10,2,1
+USB Relay Name 3,COM10,3,0
+USB Relay Name 4,COM10,4,0
