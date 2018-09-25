@@ -2,6 +2,7 @@
 Written in java using OpenProcessing libraries
 
 **Basic Usage**
+
 Update the relay_config.csv to match your relay settings.  The app supports up to 8 relays.  Leave rows blank for unused relays.
 - Label: Text displayed next to the switch in the app
 - Com Port: The com port number for that relay, ex: COM2
