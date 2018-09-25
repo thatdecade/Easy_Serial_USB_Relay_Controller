@@ -13,9 +13,9 @@ Launch app and click the switches to Close / Open the relays.
 
 **Serial Format:**
 
-Byte 1: Start Byte 0xA0
-Byte 2: Channel Number
-Byte 3: Relay State
-Byte 4: Checksum
+* Byte 1: Start Byte 0xA0
+* Byte 2: Channel Number
+* Byte 3: Relay State
+* Byte 4: Checksum
 
 Example: 0xA0 0x01 0x01 0xA2
