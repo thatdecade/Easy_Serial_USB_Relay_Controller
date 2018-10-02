@@ -24,3 +24,19 @@ The app supports up to 8 relays.  Leave rows blank for unused relays.
 * Byte 4: Checksum
 
 Example: 0xA0 0x01 0x01 0xA2
+
+**Troubleshooting:**
+
+The COM number must match the relay device under windows device manager.  Check that no other applications have locked the port.  If neeeded, restart your pc to force the connection from the other application to close.
+
+**relay_config.csv Example:**
+
+label,comport,channel,default  
+Relay Name 1,COM10,1,1  
+Relay Name 2,COM10,2,1  
+Relay Name 3,COM10,3,0  
+Relay Name 4,COM10,4,0  
+Relay Name 5,COM10,1,1  
+Relay Name 6,COM10,2,1  
+Relay Name 7,COM10,3,0  
+Relay Name 8,COM10,4,0  
